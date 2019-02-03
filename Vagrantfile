@@ -74,11 +74,13 @@ Vagrant.configure("2") do |config|
     curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
     sudo apt-key fingerprint 0EBFCD88
     sudo apt-get install -y docker.io
+    sudo groupadd docker
+    sudo usermod -aG docker vagrant
   SHELL
 
   config.vm.provision "node", type: "shell", inline: <<-SHELL
     su vagrant
-    curl -s https://nodejs.org/dist/v8.9.4/node-v8.9.4-linux-x64.tar.gz -o node-v8.9.4-linux-x64.tar.gz
+    curl -Os https://nodejs.org/dist/v8.9.4/node-v8.9.4-linux-x64.tar.gz
     tar zxf node-v8.9.4-linux-x64.tar.gz
     sudo ln -f -s `pwd`/node-v8.9.4-linux-x64/bin/node /bin/
     sudo ln -f -s `pwd`/node-v8.9.4-linux-x64/bin/npm /bin/
@@ -100,10 +102,12 @@ Vagrant.configure("2") do |config|
 
   config.vm.provision "composer2", type: "shell", inline: <<-SHELL
     su vagrant /usr/bin/env bash -c ' \
-      mkdir /home/vagrant/fabric-dev-servers && cd /home/vagrant/fabric-dev-servers \
-      curl -O https://raw.githubusercontent.com/hyperledger/composer-tools/master/packages/fabric-dev-servers/fabric-dev-servers.tar.gz \
-      tar -xvf fabric-dev-servers.tar.gz \
-    '
+      mkdir -p /home/vagrant/fabric-dev-servers && cd /home/vagrant/fabric-dev-servers && \
+      curl -Os https://raw.githubusercontent.com/hyperledger/composer-tools/master/packages/fabric-dev-servers/fabric-dev-servers.tar.gz && \
+      tar -xvf fabric-dev-servers.tar.gz && \
+      cd ~/fabric-dev-servers && \
+      export FABRIC_VERSION=hlfv12 && \
+      ./downloadFabric.sh'
   SHELL
 
   config.vm.provision "user", type: "shell", inline: <<-SHELL
